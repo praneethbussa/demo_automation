@@ -53,3 +53,33 @@ then
 aws s3 cp /tmp/${name}-httpd-logs-${timestamp}.tar s3://${s3_bucket}/${name}-httpd-logs-${timestamp}.tar
 
 fi
+
+# Task # start 
+
+file_path="/var/www/html"
+
+#check inventory file is present or not if not then create one with specified columns
+if [ ! -f ${file_path}/inventory.html ];
+
+then
+    echo -e 'LogType\t\tTimeCreated\t\tType\t\tSize' >> ${file_path}/inventory.html
+
+fi
+
+#if inventory file is present then add the require data under columns
+if [ -f ${file_path}/inventory.html ]
+
+then
+    tar_size=$(du -h /tmp/* | tail -1 | awk '{print $1}')
+    echo "httpd-log\t\t${timestamp}\t\ttar\t\t${tar_size}" >> ${file_path}/inventory.html
+
+fi
+
+#check if automation file is in cron.d
+if [ ! -f /etc/crond.d/automation ];
+
+then
+    #apply cron to automation.sh file
+    echo "0 10 * * * root /root/Automation_Project/automation.sh" > /etc/cron.d/automation
+fi
+
